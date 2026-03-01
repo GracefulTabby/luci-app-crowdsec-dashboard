@@ -16,6 +16,19 @@ check_cscli() {
 	fi
 }
 
+# Validate IPv4 address or IPv4 CIDR range (e.g. 1.2.3.4 or 1.2.3.0/24)
+validate_ip() {
+	local ip="$1"
+	echo "$ip" | grep -qE \
+		'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))?$'
+}
+
+# Validate duration format accepted by cscli (e.g. 4h, 30m, 7d, 60s)
+validate_duration() {
+	local dur="$1"
+	echo "$dur" | grep -qE '^[0-9]+(s|m|h|d)$'
+}
+
 # Get decisions list
 get_decisions() {
 	check_cscli
@@ -125,23 +138,33 @@ add_ban() {
 	local ip="$1"
 	local duration="${2:-4h}"
 	local reason="${3:-manual ban from dashboard}"
-	
+
 	check_cscli
-	
+
 	if [ -z "$ip" ]; then
 		echo '{"success": false, "error": "IP required"}'
 		return 1
 	fi
-	
+
+	if ! validate_ip "$ip"; then
+		echo '{"success": false, "error": "Invalid IP address or CIDR range"}'
+		return 1
+	fi
+
+	if ! validate_duration "$duration"; then
+		echo '{"success": false, "error": "Invalid duration format (use: 30s, 4h, 7d, etc.)"}'
+		return 1
+	fi
+
 	local result
 	result=$($CSCLI decisions add --ip "$ip" --duration "$duration" --reason "$reason" 2>&1)
-	
+
 	if [ $? -eq 0 ]; then
 		echo '{"success": true}'
 	else
 		json_init
 		json_add_boolean "success" 0
-		json_add_string "error" "$result"
+		json_add_string "error" "Failed to add decision"
 		json_dump
 	fi
 }
@@ -149,23 +172,28 @@ add_ban() {
 # Remove ban
 remove_ban() {
 	local ip="$1"
-	
+
 	check_cscli
-	
+
 	if [ -z "$ip" ]; then
 		echo '{"success": false, "error": "IP required"}'
 		return 1
 	fi
-	
+
+	if ! validate_ip "$ip"; then
+		echo '{"success": false, "error": "Invalid IP address or CIDR range"}'
+		return 1
+	fi
+
 	local result
 	result=$($CSCLI decisions delete --ip "$ip" 2>&1)
-	
+
 	if [ $? -eq 0 ]; then
 		echo '{"success": true}'
 	else
 		json_init
 		json_add_boolean "success" 0
-		json_add_string "error" "$result"
+		json_add_string "error" "Failed to remove decision"
 		json_dump
 	fi
 }
