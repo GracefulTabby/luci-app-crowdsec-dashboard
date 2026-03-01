@@ -100,6 +100,7 @@ jobs:
           [ -z "$SDK_FILE" ] && { echo "❌ SDK archive not found in sha256sums"; cat sha256sums; exit 1; }
 
           echo "Downloading: $SDK_FILE"
+          mkdir -p sdk-archive
           wget -q "${SDK_BASE}/${SDK_FILE}" -O "sdk-archive/${SDK_FILE}"
           echo "SDK_FILE=${SDK_FILE}" >> "$GITHUB_ENV"
 
