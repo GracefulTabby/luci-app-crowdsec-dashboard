@@ -143,22 +143,30 @@ jobs:
             --exclude='sdk-archive' \
             --exclude='sdk-extract' \
             --exclude='*.tar.*' \
+            --exclude='po/templates' \
             . "sdk/package/${{ env.PKG_NAME }}/"
+          echo "=== Package directory layout ==="
+          find "sdk/package/${{ env.PKG_NAME }}" -maxdepth 3 | sort
 
       - name: Build package
         run: |
           cd sdk
           make defconfig 2>&1 | tail -5
-          make "package/${{ env.PKG_NAME }}/compile" V=s -j"$(nproc)" 2>&1 | tail -40 \
-            || make "package/${{ env.PKG_NAME }}/compile" V=s -j1 2>&1 | tail -80
+          echo "=== Building ${{ env.PKG_NAME }} ==="
+          # Run without piping so make's exit code is not masked.
+          # On parallel-build failure, retry with -j1 for cleaner output.
+          make "package/${{ env.PKG_NAME }}/compile" V=s -j"$(nproc)" \
+            || make "package/${{ env.PKG_NAME }}/compile" V=s -j1
 
       - name: Find and verify IPK
         id: find_ipk
         run: |
+          echo "=== All built IPKs ==="
+          find sdk/bin -name "*.ipk" | sort
+          echo "========================"
           IPK=$(find sdk/bin -name "${{ env.PKG_NAME }}_*.ipk" | head -1)
           if [ -z "$IPK" ]; then
-            echo "❌ IPK not found. Available files:"
-            find sdk/bin -name "*.ipk" | head -20
+            echo "❌ IPK not found: ${{ env.PKG_NAME }}_*.ipk"
             exit 1
           fi
           echo "✅ IPK built: $IPK"
