@@ -192,23 +192,35 @@ get_dashboard_stats() {
 	json_add_int "bouncers" "${bouncers_count:-0}"
 	
 	# Top scenarios (from alerts)
+	# Escape backslashes and double-quotes to prevent JSON injection
 	local scenarios
 	scenarios=$($CSCLI alerts list -o json --limit 100 2>/dev/null | \
 		jsonfilter -e '@[*].scenario' 2>/dev/null | \
 		sort | uniq -c | sort -rn | head -5 | \
-		awk '{print "{\"scenario\":\"" $2 "\",\"count\":" $1 "}"}' | \
+		awk '{
+			name = $2
+			gsub(/\\/, "\\\\", name)
+			gsub(/"/, "\\\"", name)
+			print "{\"scenario\":\"" name "\",\"count\":" $1 "}"
+		}' | \
 		tr '\n' ',' | sed 's/,$//')
-	
+
 	json_add_string "top_scenarios_raw" "[$scenarios]"
-	
+
 	# Top countries (from decisions)
+	# Escape backslashes and double-quotes to prevent JSON injection
 	local countries
 	countries=$($CSCLI decisions list -o json 2>/dev/null | \
 		jsonfilter -e '@[*].country' 2>/dev/null | \
 		sort | uniq -c | sort -rn | head -10 | \
-		awk '{print "{\"country\":\"" $2 "\",\"count\":" $1 "}"}' | \
+		awk '{
+			name = $2
+			gsub(/\\/, "\\\\", name)
+			gsub(/"/, "\\\"", name)
+			print "{\"country\":\"" name "\",\"count\":" $1 "}"
+		}' | \
 		tr '\n' ',' | sed 's/,$//')
-	
+
 	json_add_string "top_countries_raw" "[$countries]"
 	
 	json_dump
