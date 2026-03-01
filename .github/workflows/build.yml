@@ -1,126 +1,305 @@
-name: Build luci-app-crowdsec-dashboard
+name: Build & Release luci-app-crowdsec-dashboard
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     tags: [ 'v*' ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 env:
-  # MUST match PKG_NAME:= in Makefile exactly
   PKG_NAME: luci-app-crowdsec-dashboard
   OPENWRT_VERSION: '23.05.5'
+  # LUCI_PKGARCH=all → arch-independent; use x86_64 SDK for the single build
+  SDK_TARGET: x86
+  SDK_SUBTARGET: '64'
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # 1. Static checks (fast — runs on all events)
+  # ─────────────────────────────────────────────────────────────────
   validate:
     name: Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Verify PKG_NAME matches Makefile
         run: |
           MAKEFILE_PKG=$(grep "^PKG_NAME:=" Makefile | cut -d= -f2)
           if [ "$MAKEFILE_PKG" != "${{ env.PKG_NAME }}" ]; then
-            echo "❌ PKG_NAME mismatch: Makefile=$MAKEFILE_PKG, Workflow=${{ env.PKG_NAME }}"
+            echo "❌ PKG_NAME mismatch: Makefile='$MAKEFILE_PKG' Workflow='${{ env.PKG_NAME }}'"
             exit 1
           fi
-          echo "✅ PKG_NAME verified: $MAKEFILE_PKG"
+          echo "✅ PKG_NAME: $MAKEFILE_PKG"
 
-      - name: Check structure
+      - name: Validate JSON files
         run: |
-          test -f Makefile
-          find . -name "*.json" -exec python3 -m json.tool {} \; >/dev/null
+          find . -name "*.json" | while read -r f; do
+            python3 -m json.tool "$f" > /dev/null \
+              && echo "✅ $f" \
+              || { echo "❌ $f"; exit 1; }
+          done
 
+      - name: Validate shell scripts (syntax check)
+        run: |
+          find root -type f | while read -r f; do
+            if head -1 "$f" | grep -qE "^#!.*(sh|bash)"; then
+              sh -n "$f" \
+                && echo "✅ $f" \
+                || { echo "❌ $f"; exit 1; }
+            fi
+          done
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2. Build — single build because LUCI_PKGARCH=all
+  # ─────────────────────────────────────────────────────────────────
   build:
-    name: Build ${{ matrix.arch }}
+    name: Build IPK (OpenWrt ${{ env.OPENWRT_VERSION }})
     needs: validate
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arch: x86_64
-            target: x86
-            subtarget: 64
-          - arch: aarch64_cortex-a53
-            target: mvebu
-            subtarget: cortexa53
-          - arch: aarch64_cortex-a72
-            target: mvebu
-            subtarget: cortexa72
-          - arch: arm_cortex-a9_vfpv3-d16
-            target: mvebu
-            subtarget: cortexa9
+    outputs:
+      ipk_path: ${{ steps.find_ipk.outputs.ipk_path }}
+      ipk_name: ${{ steps.find_ipk.outputs.ipk_name }}
+      pkg_version: ${{ steps.pkg_info.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup environment
+      - name: Extract package version
+        id: pkg_info
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential clang flex bison g++ gawk \
+          VERSION=$(grep "^PKG_VERSION:=" Makefile | cut -d= -f2)
+          RELEASE=$(grep "^PKG_RELEASE:=" Makefile | cut -d= -f2)
+          echo "version=${VERSION}-${RELEASE}" >> "$GITHUB_OUTPUT"
+          echo "Package version: ${VERSION}-${RELEASE}"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential clang flex bison g++ gawk \
             gcc-multilib gettext git libncurses5-dev libssl-dev \
             python3-setuptools rsync unzip zlib1g-dev file wget xsltproc
 
-      - name: Download and extract SDK
+      - name: Cache OpenWrt SDK
+        id: sdk_cache
+        uses: actions/cache@v4
+        with:
+          path: sdk-archive
+          key: openwrt-sdk-${{ env.OPENWRT_VERSION }}-${{ env.SDK_TARGET }}-${{ env.SDK_SUBTARGET }}
+
+      - name: Download OpenWrt SDK
+        if: steps.sdk_cache.outputs.cache-hit != 'true'
         run: |
-          SDK_BASE="https://downloads.openwrt.org/releases/${{ env.OPENWRT_VERSION }}/targets/${{ matrix.target }}/${{ matrix.subtarget }}"
-          wget -q "${SDK_BASE}/sha256sums"
-          SDK_FILE=$(grep -E "openwrt-sdk.*\.tar\.(xz|zst)" sha256sums | head -1 | awk '{print $NF}' | tr -d '*')
-          [ -z "$SDK_FILE" ] && { echo "SDK not found"; exit 1; }
-          
-          echo "Downloading $SDK_FILE..."
-          wget -q "${SDK_BASE}/${SDK_FILE}"
-          
+          SDK_BASE="https://downloads.openwrt.org/releases/${{ env.OPENWRT_VERSION }}/targets/${{ env.SDK_TARGET }}/${{ env.SDK_SUBTARGET }}"
+          wget -q "${SDK_BASE}/sha256sums" -O sha256sums
+          SDK_FILE=$(grep -E "openwrt-sdk.*\.tar\.(xz|zst)$" sha256sums \
+                     | head -1 | awk '{print $NF}' | tr -d '*')
+          [ -z "$SDK_FILE" ] && { echo "❌ SDK archive not found in sha256sums"; cat sha256sums; exit 1; }
+
+          echo "Downloading: $SDK_FILE"
+          wget -q "${SDK_BASE}/${SDK_FILE}" -O "sdk-archive/${SDK_FILE}"
+          echo "SDK_FILE=${SDK_FILE}" >> "$GITHUB_ENV"
+
+      - name: Extract SDK
+        run: |
+          mkdir -p sdk-extract
+          SDK_FILE=$(ls sdk-archive/*.tar.* 2>/dev/null | head -1)
+          [ -z "$SDK_FILE" ] && { echo "❌ No SDK archive in sdk-archive/"; ls sdk-archive/; exit 1; }
+          echo "Extracting: $SDK_FILE"
           case "$SDK_FILE" in
-            *.tar.xz) tar -xJf "$SDK_FILE" ;;
-            *.tar.zst) tar --zstd -xf "$SDK_FILE" ;;
-            *) tar -xf "$SDK_FILE" ;;
+            *.tar.xz)  tar -xJf "$SDK_FILE" -C sdk-extract ;;
+            *.tar.zst) tar --zstd -xf "$SDK_FILE" -C sdk-extract ;;
+            *)         tar -xf  "$SDK_FILE" -C sdk-extract ;;
           esac
-          
-          SDK_DIR=$(find . -maxdepth 1 -type d -name "openwrt-sdk-*" -print -quit)
-          [ -z "$SDK_DIR" ] && { echo "SDK dir not found"; exit 1; }
+          SDK_DIR=$(find sdk-extract -maxdepth 1 -type d -name "openwrt-sdk-*" -print -quit)
+          [ -z "$SDK_DIR" ] && { echo "❌ SDK directory not found"; ls sdk-extract/; exit 1; }
           mv "$SDK_DIR" sdk
 
-      - name: Setup feeds and build
+      - name: Cache feeds
+        uses: actions/cache@v4
+        with:
+          path: sdk/feeds
+          key: openwrt-feeds-${{ env.OPENWRT_VERSION }}-${{ hashFiles('sdk/feeds.conf.default') }}
+          restore-keys: openwrt-feeds-${{ env.OPENWRT_VERSION }}-
+
+      - name: Configure feeds
         run: |
           cd sdk
           grep -q "^src-git luci" feeds.conf.default || \
             echo "src-git luci https://github.com/openwrt/luci.git;openwrt-23.05" >> feeds.conf.default
-          
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-          
-          mkdir -p "package/${{ env.PKG_NAME }}"
-          rsync -av --exclude='.git' --exclude='sdk' --exclude='*.tar.*' ../. "package/${{ env.PKG_NAME }}/"
-          
-          make defconfig
-          make "package/${{ env.PKG_NAME }}/compile" V=s -j$(nproc) || \
-            make "package/${{ env.PKG_NAME }}/compile" V=s -j1
+          ./scripts/feeds update -a 2>&1 | tail -5
+          ./scripts/feeds install -a 2>&1 | tail -5
 
-      - name: Upload artifacts
+      - name: Copy package source into SDK
+        run: |
+          mkdir -p "sdk/package/${{ env.PKG_NAME }}"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='sdk' \
+            --exclude='sdk-archive' \
+            --exclude='sdk-extract' \
+            --exclude='*.tar.*' \
+            . "sdk/package/${{ env.PKG_NAME }}/"
+
+      - name: Build package
+        run: |
+          cd sdk
+          make defconfig 2>&1 | tail -5
+          make "package/${{ env.PKG_NAME }}/compile" V=s -j"$(nproc)" 2>&1 | tail -40 \
+            || make "package/${{ env.PKG_NAME }}/compile" V=s -j1 2>&1 | tail -80
+
+      - name: Find and verify IPK
+        id: find_ipk
+        run: |
+          IPK=$(find sdk/bin -name "${{ env.PKG_NAME }}_*.ipk" | head -1)
+          if [ -z "$IPK" ]; then
+            echo "❌ IPK not found. Available files:"
+            find sdk/bin -name "*.ipk" | head -20
+            exit 1
+          fi
+          echo "✅ IPK built: $IPK"
+          ls -lh "$IPK"
+          echo "ipk_path=$IPK"  >> "$GITHUB_OUTPUT"
+          echo "ipk_name=$(basename "$IPK")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload IPK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PKG_NAME }}-${{ matrix.arch }}
-          path: sdk/bin/**/*.ipk
+          name: ${{ env.PKG_NAME }}-ipk
+          path: sdk/bin/**/${{ env.PKG_NAME }}_*.ipk
           if-no-files-found: error
+          retention-days: 30
 
+  # ─────────────────────────────────────────────────────────────────
+  # 3. Release — only on version tags (v*)
+  # ─────────────────────────────────────────────────────────────────
   release:
+    name: Create GitHub Release
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+
+      - name: Download IPK artifact
+        uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          merge-multiple: true
-      - uses: softprops/action-gh-release@v1
+          name: ${{ env.PKG_NAME }}-ipk
+          path: release/
+
+      - name: Flatten release directory
+        run: |
+          find release -name "*.ipk" -exec mv {} release/ \;
+          find release -type d -empty -delete
+          ls -lh release/
+
+      - name: Generate OPKG Packages index
+        run: |
+          cd release
+          python3 << 'PYEOF'
+          import os, glob, io, gzip, subprocess
+
+          def control_from_ipk(ipk_path):
+              """Extract ./control from an ipk (ar archive containing control.tar.*)."""
+              for member in ('control.tar.gz', 'control.tar.xz'):
+                  r = subprocess.run(['ar', 'p', ipk_path, member], capture_output=True)
+                  if r.returncode != 0:
+                      continue
+                  import tarfile
+                  mode = 'r:gz' if member.endswith('.gz') else 'r:xz'
+                  try:
+                      ct = tarfile.open(fileobj=io.BytesIO(r.stdout), mode=mode)
+                      f = ct.extractfile('./control') or ct.extractfile('control')
+                      return f.read().decode()
+                  except Exception:
+                      pass
+              return None
+
+          entries = []
+          for ipk in sorted(glob.glob('*.ipk')):
+              ctrl = control_from_ipk(ipk)
+              if not ctrl:
+                  print(f'WARNING: could not read control from {ipk}')
+                  continue
+              size   = os.path.getsize(ipk)
+              sha256 = subprocess.run(['sha256sum', ipk], capture_output=True, text=True).stdout.split()[0]
+              entry  = ctrl.rstrip('\n') + f'\nFilename: {ipk}\nSize: {size}\nSHA256sum: {sha256}\n'
+              entries.append(entry)
+              print(f'  + {ipk}')
+
+          content = '\n'.join(entries) + '\n'
+          with open('Packages', 'w') as f:
+              f.write(content)
+          with gzip.open('Packages.gz', 'wb') as f:
+              f.write(content.encode())
+          print(f'Generated Packages index ({len(entries)} package(s))')
+          PYEOF
+          echo "=== Release contents ==="
+          ls -lh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*.ipk
-          generate_release_notes: true
+          tag_name: ${{ github.ref_name }}
+          name: ${{ env.PKG_NAME }} ${{ github.ref_name }}
+          body: |
+            ## 📦 ${{ env.PKG_NAME }} ${{ github.ref_name }}
+
+            OpenWrt ${{ env.OPENWRT_VERSION }} 向けビルド。
+            `LUCI_PKGARCH: all` のためすべてのアーキテクチャ（aarch64, x86_64, arm など）で使用できます。
+
+            ---
+
+            ### 🔧 直接インストール
+
+            ```bash
+            cd /tmp
+            wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ needs.build.outputs.ipk_name }}
+            opkg install ${{ needs.build.outputs.ipk_name }}
+            /etc/init.d/rpcd restart
+            /etc/init.d/uhttpd restart
+            ```
+
+            ### 📡 OPKG カスタムフィードとして追加
+
+            `/etc/opkg/customfeeds.conf` に以下を追記:
+
+            ```
+            src/gz crowdsec-dashboard https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}
+            ```
+
+            その後:
+
+            ```bash
+            opkg update
+            opkg install ${{ env.PKG_NAME }}
+            /etc/init.d/rpcd restart
+            /etc/init.d/uhttpd restart
+            ```
+
+            ### 📋 動作確認環境
+
+            | 項目 | 値 |
+            |---|---|
+            | OpenWrt | ${{ env.OPENWRT_VERSION }} |
+            | Target | mvebu/cortexa72 (iEi Puzzle-M902) |
+            | Architecture | aarch64 (all) |
+
+            ### 📝 依存パッケージ
+
+            ```bash
+            opkg install luci-base rpcd rpcd-mod-luci crowdsec
+            ```
+          files: |
+            release/*.ipk
+            release/Packages
+            release/Packages.gz
+          fail_on_unmatched_files: true
+          generate_release_notes: false
+
