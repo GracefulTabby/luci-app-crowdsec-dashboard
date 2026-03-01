@@ -1,4 +1,5 @@
 'use strict';
+'require baseclass';
 'require rpc';
 
 /**
@@ -70,7 +71,7 @@ var callUnban = rpc.declare({
 	expect: { }
 });
 
-return {
+return baseclass.extend({
 
 	getStatus: callStatus,
 	getBouncers: callBouncers,
@@ -172,4 +173,4 @@ return {
 		var b = country.toUpperCase().codePointAt(1) - 65 + 0x1F1E6;
 		return String.fromCodePoint(a) + String.fromCodePoint(b);
 	}
-};
+});
