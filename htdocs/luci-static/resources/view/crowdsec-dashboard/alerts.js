@@ -70,22 +70,22 @@ return view.extend({
 		var reason = 'Manual ban from alert: ' + scenario;
 
 		if (!self.csApi.isValidIP(ip)) {
-			self.showToast('Invalid source IP address', 'error');
+			self.showToast(_('Invalid source IP address'), 'error');
 			return;
 		}
-		
-		if (!confirm('Ban IP ' + ip + ' for ' + duration + '?')) {
+
+		if (!confirm(_('Ban IP') + ' ' + ip + ' ' + _('for') + ' ' + duration + '?')) {
 			return;
 		}
-		
+
 		this.csApi.banIP(ip, duration, reason).then(function(result) {
 			if (result.success) {
-				self.showToast('IP ' + ip + ' banned successfully', 'success');
+				self.showToast(_('IP') + ' ' + ip + ' ' + _('banned successfully'), 'success');
 			} else {
-				self.showToast('Failed to ban: ' + (result.error || 'Unknown error'), 'error');
+				self.showToast(_('Failed to ban') + ': ' + (result.error || _('Unknown error')), 'error');
 			}
 		}).catch(function(err) {
-			self.showToast('Error: ' + err.message, 'error');
+			self.showToast(_('Error') + ': ' + err.message, 'error');
 		});
 	},
 
@@ -104,10 +104,15 @@ return view.extend({
 		if (container) {
 			dom.content(container, this.renderTable());
 		}
-		
+
+		var statsEl = document.getElementById('alerts-stats');
+		if (statsEl) {
+			dom.content(statsEl, this.renderStats());
+		}
+
 		var countEl = document.getElementById('alerts-count');
 		if (countEl) {
-			countEl.textContent = this.filteredAlerts.length + ' of ' + this.alerts.length + ' alerts';
+			countEl.textContent = this.filteredAlerts.length + ' / ' + this.alerts.length;
 		}
 	},
 
@@ -135,7 +140,7 @@ return view.extend({
 		if (this.filteredAlerts.length === 0) {
 			return E('div', { 'class': 'cs-empty' }, [
 				E('div', { 'class': 'cs-empty-icon' }, this.searchQuery ? '🔍' : '📭'),
-				E('p', {}, this.searchQuery ? 'No matching alerts found' : 'No alerts recorded')
+				E('p', {}, this.searchQuery ? _('No matching alerts found') : _('No alerts recorded'))
 			]);
 		}
 		
@@ -163,136 +168,141 @@ return view.extend({
 					'title': self.renderAlertDetails(a)
 			}, (function(s) { return s.length > 40 ? s.substring(0, 40) + '...' : s; })(self.renderAlertDetails(a)))),
 				E('td', {}, sourceIp !== 'N/A' ? E('button', {
-					'class': 'cs-btn cs-btn-sm',
-					'click': ui.createHandlerFn(self, 'handleBanFromAlert', sourceIp, a.scenario)
-				}, 'Ban') : '-')
-			]);
+				'class': 'cs-btn cs-btn-sm cs-btn-danger',
+				'click': ui.createHandlerFn(self, 'handleBanFromAlert', sourceIp, a.scenario)
+			}, _('Ban')) : '—')
+		]);
 		});
-		
-		return E('div', {}, [
+
+		return E('div', { 'class': 'cs-table-wrap' }, [
 			E('table', { 'class': 'cs-table' }, [
 				E('thead', {}, E('tr', {}, [
-					E('th', {}, 'Time'),
-					E('th', {}, 'Source IP'),
-					E('th', {}, 'Scenario'),
-					E('th', {}, 'Country'),
-					E('th', {}, 'Events'),
-					E('th', {}, 'Decision'),
-					E('th', {}, 'Details'),
-					E('th', {}, 'Actions')
+					E('th', {}, _('Time')),
+					E('th', {}, _('Source IP')),
+					E('th', {}, _('Scenario')),
+					E('th', {}, _('Country')),
+					E('th', {}, _('Events')),
+					E('th', {}, _('Decision')),
+					E('th', {}, _('Details')),
+					E('th', {}, _('Actions'))
 				])),
 				E('tbody', {}, rows)
 			]),
-			this.alerts.length >= this.limit ? E('div', { 
-				'style': 'text-align: center; padding: 20px' 
+			this.alerts.length >= this.limit ? E('div', {
+				'style': 'text-align: center; padding: 20px'
 			}, [
 				E('button', {
 					'class': 'cs-btn',
 					'click': ui.createHandlerFn(this, 'handleLoadMore')
-				}, 'Load More Alerts')
-			]) : null
+				}, _('Load More Alerts'))
 		]);
 	},
 
 	renderStats: function() {
 		var self = this;
-		
-		// Aggregate by scenario
+
 		var scenarioCounts = {};
-		var countryCounts = {};
+		var countryCounts  = {};
 		var last24h = 0;
 		var now = new Date();
-		
+
 		this.alerts.forEach(function(a) {
 			var scenario = self.csApi.parseScenario(a.scenario);
 			scenarioCounts[scenario] = (scenarioCounts[scenario] || 0) + 1;
-			
-			var country = a.source?.country || 'Unknown';
+
+			var country = (a.source && a.source.country) ? a.source.country : 'Unknown';
 			countryCounts[country] = (countryCounts[country] || 0) + 1;
-			
+
 			var created = new Date(a.created_at);
-			if ((now - created) < 86400000) {
-				last24h++;
-			}
+			if ((now - created) < 86400000) last24h++;
 		});
-		
-		// Top 5 scenarios
-		var topScenarios = Object.entries(scenarioCounts)
+
+		var topScenarios = Object.keys(scenarioCounts)
+			.map(function(k) { return [k, scenarioCounts[k]]; })
 			.sort(function(a, b) { return b[1] - a[1]; })
 			.slice(0, 5);
-		
-		var maxScenarioCount = topScenarios.length > 0 ? topScenarios[0][1] : 0;
-		
+
+		var maxCount = topScenarios.length > 0 ? topScenarios[0][1] : 0;
+
 		var scenarioBars = topScenarios.map(function(s) {
-			var pct = maxScenarioCount > 0 ? (s[1] / maxScenarioCount * 100) : 0;
+			var pct = maxCount > 0 ? (s[1] / maxCount * 100) : 0;
 			return E('div', { 'class': 'cs-bar-item' }, [
 				E('div', { 'class': 'cs-bar-label', 'title': s[0] }, s[0]),
 				E('div', { 'class': 'cs-bar-track' }, [
-					E('div', { 'class': 'cs-bar-fill', 'style': 'width: ' + pct + '%' })
+					E('div', { 'class': 'cs-bar-fill purple', 'style': 'width: ' + pct + '%' })
 				]),
 				E('div', { 'class': 'cs-bar-value' }, String(s[1]))
 			]);
 		});
-		
-		return E('div', { 'class': 'cs-charts-row', 'style': 'margin-bottom: 24px' }, [
-			E('div', { 'class': 'cs-stat-card' }, [
-				E('div', { 'class': 'cs-stat-label' }, 'Total Alerts'),
+
+		return [
+			E('div', { 'class': 'cs-stat-card', 'data-accent': 'orange' }, [
+				E('span', { 'class': 'cs-stat-card-icon' }, '🚨'),
+				E('div', { 'class': 'cs-stat-label' }, _('Total Alerts')),
 				E('div', { 'class': 'cs-stat-value' }, String(this.alerts.length)),
-				E('div', { 'class': 'cs-stat-trend' }, last24h + ' in last 24h')
+				E('div', { 'class': 'cs-stat-description' }, last24h + ' ' + _('in last 24h'))
 			]),
-			E('div', { 'class': 'cs-stat-card' }, [
-				E('div', { 'class': 'cs-stat-label' }, 'Unique Scenarios'),
-				E('div', { 'class': 'cs-stat-value' }, String(Object.keys(scenarioCounts).length))
+			E('div', { 'class': 'cs-stat-card', 'data-accent': 'purple' }, [
+				E('span', { 'class': 'cs-stat-card-icon' }, '🔬'),
+				E('div', { 'class': 'cs-stat-label' }, _('Unique Scenarios')),
+				E('div', { 'class': 'cs-stat-value' }, String(Object.keys(scenarioCounts).length)),
+				E('div', { 'class': 'cs-stat-description' }, _('Attack patterns detected'))
 			]),
-			E('div', { 'class': 'cs-stat-card' }, [
-				E('div', { 'class': 'cs-stat-label' }, 'Countries'),
-				E('div', { 'class': 'cs-stat-value' }, String(Object.keys(countryCounts).length))
+			E('div', { 'class': 'cs-stat-card', 'data-accent': 'blue' }, [
+				E('span', { 'class': 'cs-stat-card-icon' }, '🌍'),
+				E('div', { 'class': 'cs-stat-label' }, _('Countries')),
+				E('div', { 'class': 'cs-stat-value' }, String(Object.keys(countryCounts).length)),
+				E('div', { 'class': 'cs-stat-description' }, _('Unique attacker origins'))
 			]),
-			E('div', { 'class': 'cs-card', 'style': 'flex: 2' }, [
+			E('div', { 'class': 'cs-card', 'style': 'overflow: visible' }, [
 				E('div', { 'class': 'cs-card-header' }, [
-					E('div', { 'class': 'cs-card-title' }, 'Top Attack Scenarios')
+					E('div', { 'class': 'cs-card-title' }, '🔍 ' + _('Top Attack Scenarios'))
 				]),
 				E('div', { 'class': 'cs-card-body' }, [
-					E('div', { 'class': 'cs-bar-chart' }, scenarioBars)
+					scenarioBars.length > 0
+						? E('div', { 'class': 'cs-bar-chart' }, scenarioBars)
+						: E('div', { 'class': 'cs-empty' }, [ E('p', {}, _('No data yet')) ])
 				])
 			])
-		]);
+		];
 	},
 
 	render: function(data) {
 		var self = this;
 		this.alerts = Array.isArray(data) ? data : [];
 		this.filterAlerts();
-		
+
 		var view = E('div', { 'class': 'crowdsec-dashboard' }, [
-			this.renderStats(),
+			// KPI + top-scenario row
+			E('div', { 'class': 'cs-stats-grid', 'id': 'alerts-stats' }, this.renderStats()),
+
+			// Main table card
 			E('div', { 'class': 'cs-card' }, [
 				E('div', { 'class': 'cs-card-header' }, [
 					E('div', { 'class': 'cs-card-title' }, [
-						'Alert History',
-						E('span', { 
-							'id': 'alerts-count',
-							'style': 'font-weight: normal; margin-left: 12px; font-size: 12px; color: var(--cs-text-muted)'
-						}, this.filteredAlerts.length + ' of ' + this.alerts.length + ' alerts')
+						'📄 ' + _('Alert History'),
+						E('span', {
+							'class': 'cs-section-badge',
+							'id': 'alerts-count'
+						}, this.filteredAlerts.length + ' / ' + this.alerts.length)
 					]),
 					E('div', { 'class': 'cs-actions-bar' }, [
 						E('div', { 'class': 'cs-search-box' }, [
 							E('input', {
 								'class': 'cs-input',
 								'type': 'text',
-								'placeholder': 'Search IP, scenario, country...',
+								'placeholder': _('Search IP, scenario, country...'),
 								'input': ui.createHandlerFn(this, 'handleSearch')
 							})
 						])
 					])
 				]),
-				E('div', { 'class': 'cs-card-body no-padding', 'id': 'alerts-table-container' }, 
+				E('div', { 'class': 'cs-card-body no-padding', 'id': 'alerts-table-container' },
 					this.renderTable()
 				)
 			])
 		]);
-		
-		// Setup polling
+
 		poll.add(function() {
 			return self.csApi.getAlerts(self.limit).then(function(newData) {
 				self.alerts = Array.isArray(newData) ? newData : [];
@@ -300,7 +310,7 @@ return view.extend({
 				self.updateTable();
 			});
 		}, 60);
-		
+
 		return view;
 	},
 

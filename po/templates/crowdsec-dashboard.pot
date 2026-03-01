@@ -7,6 +7,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Project-Id-Version: luci-app-crowdsec-dashboard\n"
 
+# ── Navigation ─────────────────────────────────────────────────────────────
 msgid "CrowdSec Dashboard"
 msgstr ""
 
@@ -22,62 +23,457 @@ msgstr ""
 msgid "Metrics"
 msgstr ""
 
+# ── Header badges ──────────────────────────────────────────────────────────
+msgid "Engine"
+msgstr ""
+
+msgid "Bouncer"
+msgstr ""
+
+msgid "Running"
+msgstr ""
+
+msgid "Stopped"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+# ── Overview KPI cards ─────────────────────────────────────────────────────
 msgid "Active Bans"
+msgstr ""
+
+msgid "IPs currently blocked by firewall"
 msgstr ""
 
 msgid "Alerts (24h)"
 msgstr ""
 
+msgid "Threat events detected in last 24h"
+msgstr ""
+
+msgid "Captcha"
+msgstr ""
+
+msgid "IPs under CAPTCHA challenge"
+msgstr ""
+
 msgid "Bouncers"
 msgstr ""
 
-msgid "Ban Rate"
+msgid "Connected remediation agents"
 msgstr ""
 
-msgid "Top Scenarios"
+# ── System health ──────────────────────────────────────────────────────────
+msgid "System Health"
+msgstr ""
+
+msgid "Engine Status"
+msgstr ""
+
+msgid "Bouncer Status"
+msgstr ""
+
+msgid "process"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Uptime"
+msgstr ""
+
+msgid "Since last reboot"
+msgstr ""
+
+msgid "Ban / Alert ratio"
+msgstr ""
+
+# ── Threat intelligence ────────────────────────────────────────────────────
+msgid "Threat Intelligence Summary"
+msgstr ""
+
+msgid "All-time aggregate"
+msgstr ""
+
+msgid "Total decisions"
+msgstr ""
+
+msgid "24h alerts"
+msgstr ""
+
+msgid "Top scenario"
+msgstr ""
+
+msgid "Top country"
+msgstr ""
+
+msgid "Unique attacker countries"
+msgstr ""
+
+msgid "countries"
+msgstr ""
+
+# ── Charts ─────────────────────────────────────────────────────────────────
+msgid "Top Attack Scenarios"
+msgstr ""
+
+msgid "Based on last 100 alerts"
 msgstr ""
 
 msgid "Top Countries"
 msgstr ""
 
+msgid "Based on active decisions"
+msgstr ""
+
+msgid "No scenario data"
+msgstr ""
+
+msgid "No country data"
+msgstr ""
+
+# ── Decisions panel ────────────────────────────────────────────────────────
 msgid "Active Decisions"
 msgstr ""
 
-msgid "Recent Alerts"
+msgid "Total Bans"
 msgstr ""
 
-msgid "Add IP Ban"
+msgid "IP ranges blocked"
 msgstr ""
 
-msgid "IP Address"
+msgid "Challenges active"
 msgstr ""
 
-msgid "Duration"
+msgid "Countries"
 msgstr ""
 
-msgid "Reason"
+msgid "Unique source countries"
 msgstr ""
 
-msgid "Cancel"
+msgid "Detection Sources"
 msgstr ""
 
-msgid "Add Ban"
-msgstr ""
-
-msgid "Unban"
-msgstr ""
-
-msgid "Unban Selected"
+msgid "Origin types"
 msgstr ""
 
 msgid "Search IP, scenario, country..."
 msgstr ""
 
+msgid "Unban Selected"
+msgstr ""
+
+msgid "Add Ban"
+msgstr ""
+
 msgid "No active decisions"
+msgstr ""
+
+msgid "No active decisions — clean state"
 msgstr ""
 
 msgid "No matching decisions found"
 msgstr ""
+
+msgid "IP Address"
+msgstr ""
+
+msgid "Scenario"
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Origin"
+msgstr ""
+
+msgid "Action"
+msgstr ""
+
+msgid "Expires"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Unban"
+msgstr ""
+
+msgid "more decisions — see Decisions tab"
+msgstr ""
+
+# ── Ban modal ──────────────────────────────────────────────────────────────
+msgid "Add IP Ban"
+msgstr ""
+
+msgid "IP Address or CIDR"
+msgstr ""
+
+msgid "IPv4 / IPv6 or CIDR notation"
+msgstr ""
+
+msgid "Duration"
+msgstr ""
+
+msgid "Examples: 30m, 4h, 7d, 1w"
+msgstr ""
+
+msgid "Reason"
+msgstr ""
+
+msgid "Reason (optional)"
+msgstr ""
+
+msgid "Manual ban from dashboard"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Please enter an IP address"
+msgstr ""
+
+msgid "Invalid IP address format"
+msgstr ""
+
+msgid "Invalid duration format (e.g. 4h, 30m, 7d)"
+msgstr ""
+
+msgid "banned for"
+msgstr ""
+
+msgid "Failed to ban"
+msgstr ""
+
+msgid "Unknown error"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "IP"
+msgstr ""
+
+msgid "Remove ban for"
+msgstr ""
+
+msgid "unbanned successfully"
+msgstr ""
+
+msgid "Failed to unban"
+msgstr ""
+
+msgid "No decisions selected"
+msgstr ""
+
+msgid "IP(s)?"
+msgstr ""
+
+msgid "IP(s) unbanned"
+msgstr ""
+
+msgid "failed"
+msgstr ""
+
+msgid "Failed to unban IPs"
+msgstr ""
+
+msgid "Ban IP"
+msgstr ""
+
+msgid "for"
+msgstr ""
+
+msgid "banned successfully"
+msgstr ""
+
+# ── Alerts panel ───────────────────────────────────────────────────────────
+msgid "Alert History"
+msgstr ""
+
+msgid "Total Alerts"
+msgstr ""
+
+msgid "in last 24h"
+msgstr ""
+
+msgid "Unique Scenarios"
+msgstr ""
+
+msgid "Attack patterns detected"
+msgstr ""
+
+msgid "Unique attacker origins"
+msgstr ""
+
+msgid "No data yet"
+msgstr ""
+
+msgid "No alerts recorded"
+msgstr ""
+
+msgid "No matching alerts found"
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+msgid "Source IP"
+msgstr ""
+
+msgid "Events"
+msgstr ""
+
+msgid "Decision"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Banned"
+msgstr ""
+
+msgid "No action"
+msgstr ""
+
+msgid "Ban"
+msgstr ""
+
+msgid "Load More Alerts"
+msgstr ""
+
+msgid "Invalid source IP address"
+msgstr ""
+
+msgid "Recent Alerts"
+msgstr ""
+
+msgid "No recent alerts"
+msgstr ""
+
+msgid "Latest 10"
+msgstr ""
+
+msgid "events"
+msgstr ""
+
+# ── Metrics panel ──────────────────────────────────────────────────────────
+msgid "Hub Components"
+msgstr ""
+
+msgid "Collections"
+msgstr ""
+
+msgid "Parsers"
+msgstr ""
+
+msgid "Scenarios"
+msgstr ""
+
+msgid "Postoverflows"
+msgstr ""
+
+msgid "updates"
+msgstr ""
+
+msgid "up to date"
+msgstr ""
+
+msgid "Registered Bouncers"
+msgstr ""
+
+msgid "No bouncers registered"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "IP Address"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Last Pull"
+msgstr ""
+
+msgid "Valid"
+msgstr ""
+
+msgid "Invalid"
+msgstr ""
+
+msgid "Registered Machines"
+msgstr ""
+
+msgid "No machines registered"
+msgstr ""
+
+msgid "Machine ID"
+msgstr ""
+
+msgid "Last Heartbeat"
+msgstr ""
+
+msgid "Validated"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Installed Collections"
+msgstr ""
+
+msgid "No collections data"
+msgstr ""
+
+msgid "installed"
+msgstr ""
+
+msgid "update available"
+msgstr ""
+
+msgid "Acquisition Sources"
+msgstr ""
+
+msgid "Acquisition metrics not available"
+msgstr ""
+
+msgid "Read"
+msgstr ""
+
+msgid "Parsed"
+msgstr ""
+
+msgid "Unparsed"
+msgstr ""
+
+msgid "Buckets"
+msgstr ""
+
+msgid "Raw Prometheus Metrics"
+msgstr ""
+
+msgid "LAPI"
+msgstr ""
+
+msgid "Hub data not available"
+msgstr ""
+
+# ── Shared ─────────────────────────────────────────────────────────────────
+msgid "Security Operations Center"
+msgstr ""
+
 
 msgid "No recent alerts"
 msgstr ""

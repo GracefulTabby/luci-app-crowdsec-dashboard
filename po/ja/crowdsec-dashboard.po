@@ -1,0 +1,475 @@
+# Japanese translation for luci-app-crowdsec-dashboard
+# Copyright (C) 2024 CyberMind.fr
+# This file is distributed under the Apache-2.0 license.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: luci-app-crowdsec-dashboard\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# ── Navigation ─────────────────────────────────────────────────────────────────
+msgid "CrowdSec Dashboard"
+msgstr "CrowdSec ダッシュボード"
+
+msgid "Overview"
+msgstr "概要"
+
+msgid "Decisions"
+msgstr "決定一覧"
+
+msgid "Alerts"
+msgstr "アラート"
+
+msgid "Metrics"
+msgstr "メトリクス"
+
+# ── Header badges ──────────────────────────────────────────────────────────────
+msgid "Engine"
+msgstr "エンジン"
+
+msgid "Bouncer"
+msgstr "バウンサー"
+
+msgid "Running"
+msgstr "稼働中"
+
+msgid "Stopped"
+msgstr "停止"
+
+msgid "Active"
+msgstr "アクティブ"
+
+msgid "Inactive"
+msgstr "非アクティブ"
+
+# ── Overview KPI cards ─────────────────────────────────────────────────────────
+msgid "Active Bans"
+msgstr "有効なBan"
+
+msgid "IPs currently blocked by firewall"
+msgstr "ファイアウォールで現在ブロック中のIP数"
+
+msgid "Alerts (24h)"
+msgstr "アラート（24時間）"
+
+msgid "Threat events detected in last 24h"
+msgstr "過去24時間に検出された脅威イベント数"
+
+msgid "Captcha"
+msgstr "キャプチャ"
+
+msgid "IPs under CAPTCHA challenge"
+msgstr "CAPTCHAチャレンジ中のIP数"
+
+msgid "Bouncers"
+msgstr "バウンサー"
+
+msgid "Connected remediation agents"
+msgstr "接続中のリメディエーションエージェント数"
+
+# ── System health ──────────────────────────────────────────────────────────────
+msgid "System Health"
+msgstr "システム状態"
+
+msgid "Engine Status"
+msgstr "エンジン状態"
+
+msgid "Bouncer Status"
+msgstr "バウンサー状態"
+
+msgid "process"
+msgstr "プロセス"
+
+msgid "Version"
+msgstr "バージョン"
+
+msgid "Uptime"
+msgstr "稼働時間"
+
+msgid "Since last reboot"
+msgstr "最終起動からの経過時間"
+
+msgid "Ban / Alert ratio"
+msgstr "Ban / アラート 比率"
+
+# ── Threat intelligence ────────────────────────────────────────────────────────
+msgid "Threat Intelligence Summary"
+msgstr "脅威インテリジェンス サマリー"
+
+msgid "All-time aggregate"
+msgstr "全期間の集計"
+
+msgid "Total decisions"
+msgstr "総Ban数"
+
+msgid "24h alerts"
+msgstr "24時間アラート"
+
+msgid "Top scenario"
+msgstr "最多シナリオ"
+
+msgid "Top country"
+msgstr "最多攻撃元国"
+
+msgid "Unique attacker countries"
+msgstr "攻撃元国の種類"
+
+msgid "countries"
+msgstr "か国"
+
+# ── Charts ─────────────────────────────────────────────────────────────────────
+msgid "Top Attack Scenarios"
+msgstr "上位攻撃シナリオ"
+
+msgid "Based on last 100 alerts"
+msgstr "直近100アラートより集計"
+
+msgid "Top Countries"
+msgstr "上位攻撃元国"
+
+msgid "Based on active decisions"
+msgstr "アクティブな決定より集計"
+
+msgid "No scenario data"
+msgstr "シナリオデータなし"
+
+msgid "No country data"
+msgstr "国別データなし"
+
+# ── Decisions panel ────────────────────────────────────────────────────────────
+msgid "Active Decisions"
+msgstr "有効な決定"
+
+msgid "Total Bans"
+msgstr "合計Ban数"
+
+msgid "IP ranges blocked"
+msgstr "ブロック済みIPレンジ"
+
+msgid "Challenges active"
+msgstr "アクティブなチャレンジ"
+
+msgid "Countries"
+msgstr "国"
+
+msgid "Unique source countries"
+msgstr "ユニーク送信元国数"
+
+msgid "Detection Sources"
+msgstr "検出ソース"
+
+msgid "Origin types"
+msgstr "発行元の種類"
+
+msgid "Search IP, scenario, country..."
+msgstr "IP、シナリオ、国で検索..."
+
+msgid "Unban Selected"
+msgstr "選択をBan解除"
+
+msgid "Add Ban"
+msgstr "Banを追加"
+
+msgid "No active decisions"
+msgstr "有効な決定はありません"
+
+msgid "No active decisions — clean state"
+msgstr "有効な決定なし — クリーン状態"
+
+msgid "No matching decisions found"
+msgstr "一致する決定が見つかりません"
+
+msgid "IP Address"
+msgstr "IPアドレス"
+
+msgid "Scenario"
+msgstr "シナリオ"
+
+msgid "Country"
+msgstr "国"
+
+msgid "Origin"
+msgstr "発行元"
+
+msgid "Action"
+msgstr "アクション"
+
+msgid "Expires"
+msgstr "有効期限"
+
+msgid "Created"
+msgstr "作成日時"
+
+msgid "Actions"
+msgstr "操作"
+
+msgid "Unban"
+msgstr "Ban解除"
+
+msgid "more decisions — see Decisions tab"
+msgstr "件の決定は「決定一覧」タブで確認できます"
+
+# ── Ban modal ──────────────────────────────────────────────────────────────────
+msgid "Add IP Ban"
+msgstr "IPをBanに追加"
+
+msgid "IP Address or CIDR"
+msgstr "IPアドレスまたはCIDR"
+
+msgid "IPv4 / IPv6 or CIDR notation"
+msgstr "IPv4 / IPv6またはCIDR表記"
+
+msgid "Duration"
+msgstr "期間"
+
+msgid "Examples: 30m, 4h, 7d, 1w"
+msgstr "例: 30m, 4h, 7d, 1w"
+
+msgid "Reason"
+msgstr "理由"
+
+msgid "Reason (optional)"
+msgstr "理由（任意）"
+
+msgid "Manual ban from dashboard"
+msgstr "ダッシュボードから手動Ban"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Please enter an IP address"
+msgstr "IPアドレスを入力してください"
+
+msgid "Invalid IP address format"
+msgstr "無効なIPアドレス形式です"
+
+msgid "Invalid duration format (e.g. 4h, 30m, 7d)"
+msgstr "無効な期間形式です（例: 4h, 30m, 7d）"
+
+msgid "banned for"
+msgstr "のBan期間:"
+
+msgid "Failed to ban"
+msgstr "Ban追加に失敗しました"
+
+msgid "Unknown error"
+msgstr "不明なエラー"
+
+msgid "Error"
+msgstr "エラー"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "Remove ban for"
+msgstr "Banを解除するIP:"
+
+msgid "unbanned successfully"
+msgstr "のBanを解除しました"
+
+msgid "Failed to unban"
+msgstr "Ban解除に失敗しました"
+
+msgid "No decisions selected"
+msgstr "決定が選択されていません"
+
+msgid "IP(s)?"
+msgstr "件のIPのBanを解除しますか？"
+
+msgid "IP(s) unbanned"
+msgstr "件のIPのBanを解除"
+
+msgid "failed"
+msgstr "件失敗"
+
+msgid "Failed to unban IPs"
+msgstr "IPのBan解除に失敗しました"
+
+msgid "Ban IP"
+msgstr "IPをBan"
+
+msgid "for"
+msgstr "で"
+
+msgid "banned successfully"
+msgstr "のBanに成功しました"
+
+# ── Alerts panel ───────────────────────────────────────────────────────────────
+msgid "Alert History"
+msgstr "アラート履歴"
+
+msgid "Total Alerts"
+msgstr "合計アラート数"
+
+msgid "in last 24h"
+msgstr "過去24時間"
+
+msgid "Unique Scenarios"
+msgstr "ユニークシナリオ数"
+
+msgid "Attack patterns detected"
+msgstr "検出された攻撃パターン"
+
+msgid "Unique attacker origins"
+msgstr "ユニーク攻撃元数"
+
+msgid "No data yet"
+msgstr "データなし"
+
+msgid "No alerts recorded"
+msgstr "アラートの記録がありません"
+
+msgid "No matching alerts found"
+msgstr "一致するアラートが見つかりません"
+
+msgid "Time"
+msgstr "時刻"
+
+msgid "Source IP"
+msgstr "送信元IP"
+
+msgid "Events"
+msgstr "イベント数"
+
+msgid "Decision"
+msgstr "決定"
+
+msgid "Details"
+msgstr "詳細"
+
+msgid "Banned"
+msgstr "Ban済み"
+
+msgid "No action"
+msgstr "アクションなし"
+
+msgid "Ban"
+msgstr "Ban"
+
+msgid "Load More Alerts"
+msgstr "さらにアラートを読み込む"
+
+msgid "Invalid source IP address"
+msgstr "無効な送信元IPアドレスです"
+
+msgid "Recent Alerts"
+msgstr "最近のアラート"
+
+msgid "No recent alerts"
+msgstr "最近のアラートなし"
+
+msgid "Latest 10"
+msgstr "最新10件"
+
+msgid "events"
+msgstr "イベント"
+
+# ── Metrics panel ──────────────────────────────────────────────────────────────
+msgid "Hub Components"
+msgstr "Hubコンポーネント"
+
+msgid "Collections"
+msgstr "コレクション"
+
+msgid "Parsers"
+msgstr "パーサー"
+
+msgid "Scenarios"
+msgstr "シナリオ"
+
+msgid "Postoverflows"
+msgstr "ポストオーバーフロー"
+
+msgid "updates"
+msgstr "件の更新あり"
+
+msgid "up to date"
+msgstr "最新"
+
+msgid "Registered Bouncers"
+msgstr "登録済みバウンサー"
+
+msgid "No bouncers registered"
+msgstr "バウンサーが登録されていません"
+
+msgid "Name"
+msgstr "名前"
+
+msgid "Type"
+msgstr "タイプ"
+
+msgid "Status"
+msgstr "ステータス"
+
+msgid "Last Pull"
+msgstr "最終取得"
+
+msgid "Valid"
+msgstr "有効"
+
+msgid "Invalid"
+msgstr "無効"
+
+msgid "Registered Machines"
+msgstr "登録済みマシン"
+
+msgid "No machines registered"
+msgstr "マシンが登録されていません"
+
+msgid "Machine ID"
+msgstr "マシンID"
+
+msgid "Last Heartbeat"
+msgstr "最終ハートビート"
+
+msgid "Validated"
+msgstr "承認済み"
+
+msgid "Pending"
+msgstr "承認待ち"
+
+msgid "Installed Collections"
+msgstr "インストール済みコレクション"
+
+msgid "No collections data"
+msgstr "コレクションデータがありません"
+
+msgid "installed"
+msgstr "インストール済み"
+
+msgid "update available"
+msgstr "アップデートあり"
+
+msgid "Acquisition Sources"
+msgstr "取得ソース"
+
+msgid "Acquisition metrics not available"
+msgstr "取得メトリクスは利用できません"
+
+msgid "Read"
+msgstr "読み込み"
+
+msgid "Parsed"
+msgstr "解析済み"
+
+msgid "Unparsed"
+msgstr "未解析"
+
+msgid "Buckets"
+msgstr "バケット"
+
+msgid "Raw Prometheus Metrics"
+msgstr "生Prometheusメトリクス"
+
+msgid "LAPI"
+msgstr "LAPI"
+
+msgid "Hub data not available"
+msgstr "Hubデータは利用できません"
+
+# ── Shared ─────────────────────────────────────────────────────────────────────
+msgid "Security Operations Center"
+msgstr "セキュリティオペレーションセンター"

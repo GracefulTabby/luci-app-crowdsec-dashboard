@@ -71,11 +71,11 @@ return view.extend({
 			E('div', { 'class': 'cs-header-right' }, [
 				E('div', { 'class': 'cs-badge ' + (engineRunning ? 'running' : 'stopped') }, [
 					E('span', { 'class': 'cs-badge-dot ' + (engineRunning ? 'running' : 'stopped') }),
-					'Engine: ' + (engineRunning ? 'Running' : 'Stopped')
+					_('Engine') + ': ' + (engineRunning ? _('Running') : _('Stopped'))
 				]),
 				E('div', { 'class': 'cs-badge ' + (bouncerRunning ? 'running' : 'stopped') }, [
 					E('span', { 'class': 'cs-badge-dot ' + (bouncerRunning ? 'running' : 'stopped') }),
-					'Bouncer: ' + (bouncerRunning ? 'Active' : 'Inactive')
+					_('Bouncer') + ': ' + (bouncerRunning ? _('Active') : _('Inactive'))
 				]),
 				E('div', { 'class': 'cs-chip' }, [
 					'⬡ v' + (status.version || 'N/A')
@@ -104,30 +104,30 @@ return view.extend({
 			{
 				accent: 'red',
 				icon: '🚫',
-				label: 'Active Bans',
+				label: _('Active Bans'),
 				value: String(banCount || totalActive),
-				desc: 'ファイアウォールで現在ブロック中のIP数'
+				desc: _('IPs currently blocked by firewall')
 			},
 			{
 				accent: 'orange',
 				icon: '⚠️',
-				label: 'Alerts (24h)',
+				label: _('Alerts (24h)'),
 				value: String(stats.alerts_24h || 0),
-				desc: '過去24時間に検出された脅威イベント数'
+				desc: _('Threat events detected in last 24h')
 			},
 			{
 				accent: 'blue',
 				icon: '📡',
-				label: 'Captcha',
+				label: _('Captcha'),
 				value: String(captchaCount),
-				desc: 'CAPTCHA チャレンジ中のIP数'
+				desc: _('IPs under CAPTCHA challenge')
 			},
 			{
 				accent: 'green',
 				icon: '🔒',
-				label: 'Bouncers',
+				label: _('Bouncers'),
 				value: String(stats.bouncers || 0),
-				desc: '接続中のバウンサー（リメディエーション）数'
+				desc: _('Connected remediation agents')
 			}
 		];
 
@@ -155,29 +155,29 @@ return view.extend({
 
 		var items = [
 			{
-				label: 'エンジン状態',
-				value: engineOk  ? '✓ Running' : '✗ Stopped',
-				sub:   'crowdsec プロセス',
+				label: _('Engine Status'),
+				value: engineOk  ? '✓ ' + _('Running') : '✗ ' + _('Stopped'),
+				sub:   'crowdsec ' + _('process'),
 				vclass: engineOk  ? 'color: var(--cs-green)' : 'color: var(--cs-red)'
 			},
 			{
-				label: 'バウンサー状態',
-				value: bouncerOk ? '✓ Active'  : '✗ Inactive',
+				label: _('Bouncer Status'),
+				value: bouncerOk ? '✓ ' + _('Active') : '✗ ' + _('Inactive'),
 				sub:   'firewall-bouncer',
 				vclass: bouncerOk ? 'color: var(--cs-green)' : 'color: var(--cs-orange)'
 			},
 			{
-				label: 'バージョン',
+				label: _('Version'),
 				value: 'v' + (status.version || 'N/A'),
 				sub:   'CrowdSec Engine'
 			},
 			{
-				label: '稼働時間',
+				label: _('Uptime'),
 				value: self.formatUptime(status.uptime),
-				sub:   'システム起動からの経過'
+				sub:   _('Since last reboot')
 			},
 			{
-				label: '封鎖→アラート比',
+				label: _('Ban / Alert ratio'),
 				value: ratio + '%',
 				sub:   last24h + ' alerts → ' + totalActive + ' bans'
 			}
@@ -185,7 +185,7 @@ return view.extend({
 
 		return E('div', { 'class': 'cs-card' }, [
 			E('div', { 'class': 'cs-card-header' }, [
-				E('div', { 'class': 'cs-card-title' }, '🖥️ System Health')
+				E('div', { 'class': 'cs-card-title' }, '🖥️ ' + _('System Health'))
 			]),
 			E('div', { 'class': 'cs-card-body' }, [
 				E('div', { 'class': 'cs-health-grid' },
@@ -208,7 +208,7 @@ return view.extend({
 		if (scenarios.length === 0) {
 			return E('div', { 'class': 'cs-empty' }, [
 				E('div', { 'class': 'cs-empty-icon' }, '📊'),
-				E('p', {}, 'シナリオデータなし')
+				E('p', {}, _('No scenario data'))
 			]);
 		}
 
@@ -246,7 +246,7 @@ return view.extend({
 		if (countries.length === 0) {
 			return E('div', { 'class': 'cs-empty' }, [
 				E('div', { 'class': 'cs-empty-icon' }, '🌍'),
-				E('p', {}, '国別データなし')
+				E('p', {}, _('No country data'))
 			]);
 		}
 
@@ -277,7 +277,7 @@ return view.extend({
 		if (!Array.isArray(decisions) || decisions.length === 0) {
 			return E('div', { 'class': 'cs-empty' }, [
 				E('div', { 'class': 'cs-empty-icon' }, '✅'),
-				E('p', {}, 'アクティブな決定なし — クリーン状態')
+				E('p', {}, _('No active decisions — clean state'))
 			]);
 		}
 
@@ -296,29 +296,28 @@ return view.extend({
 				E('td', {}, E('button', {
 					'class': 'cs-btn cs-btn-danger cs-btn-sm',
 					'click': ui.createHandlerFn(self, 'handleUnban', d.value)
-				}, 'Unban'))
-			]);
+			}, _('Unban')))
+		]);
 		});
 
 		return E('div', {}, [
-			E('table', { 'class': 'cs-table' }, [
-				E('thead', {}, E('tr', {}, [
-					E('th', {}, 'IP アドレス'),
-					E('th', {}, 'シナリオ'),
-					E('th', {}, '国'),
-					E('th', {}, 'アクション'),
-					E('th', {}, '有効期限'),
-					E('th', {}, '発行元'),
-					E('th', {}, '操作')
-				])),
-				E('tbody', {}, rows)
+			E('div', { 'class': 'cs-table-wrap' }, [
+				E('table', { 'class': 'cs-table' }, [
+					E('thead', {}, E('tr', {}, [
+						E('th', {}, _('IP Address')),
+						E('th', {}, _('Scenario')),
+						E('th', {}, _('Country')),
+						E('th', {}, _('Action')),
+						E('th', {}, _('Expires')),
+						E('th', {}, _('Origin')),
+						E('th', {}, _('Actions'))
+					])),
+					E('tbody', {}, rows)
+				])
 			]),
 			decisions.length > 15
 				? E('div', { 'style': 'padding: 10px 16px; font-size: 11.5px; color: var(--cs-text-muted); border-top: 1px solid var(--cs-border-muted)' },
-					'+ ' + (decisions.length - 15) + ' 件の決定は「Decisions」タブで確認できます')
-				: null
-		]);
-	},
+					'+ ' + (decisions.length - 15) + ' ' + _('more decisions — see Decisions tab'))
 
 	/* ── Alert timeline ─────────────────────────────────────────────────────── */
 	renderAlertsTimeline: function(alerts) {
@@ -327,7 +326,7 @@ return view.extend({
 		if (!Array.isArray(alerts) || alerts.length === 0) {
 			return E('div', { 'class': 'cs-empty' }, [
 				E('div', { 'class': 'cs-empty-icon' }, '📭'),
-				E('p', {}, '最近のアラートなし')
+				E('p', {}, _('No recent alerts'))
 			]);
 		}
 
@@ -343,10 +342,12 @@ return view.extend({
 							E('span', { 'class': 'cs-scenario' },
 								self.csApi.parseScenario(a.scenario))
 						]),
-						E('div', { 'style': 'display:flex; gap:8px; align-items:center; flex-wrap:wrap' }, [
-							E('span', { 'class': 'cs-ip' }, srcIp),
-							E('span', { 'style': 'font-size:11px; color: var(--cs-text-muted)' },
-								evCount + ' events'),
+					E('div', {
+						'style': 'display:flex; gap:8px; align-items:center; flex-wrap:wrap'
+					}, [
+						E('span', { 'class': 'cs-ip' }, srcIp),
+						E('span', { 'style': 'font-size:11px; color: var(--cs-text-muted)' },
+							evCount + ' ' + _('events')),
 							a.source && a.source.country
 								? E('span', { 'class': 'cs-country' }, [
 									E('span', { 'class': 'cs-country-flag' },
@@ -373,17 +374,17 @@ return view.extend({
 		var uniqueCountries = countries.length;
 
 		var items = [
-			{ label: '総封鎖数',           value: String(totalDecisions),  color: 'var(--cs-red)' },
-			{ label: '24h アラート',        value: String(alerts24h),       color: 'var(--cs-orange)' },
-			{ label: '最多攻撃シナリオ',    value: topScenario,             color: 'var(--cs-purple)' },
-			{ label: '最多攻撃元国',        value: topCountry,              color: 'var(--cs-blue)' },
-			{ label: '攻撃元 国種類数',     value: uniqueCountries + ' か国', color: 'var(--cs-text-primary)' }
+			{ label: _('Total decisions'),    value: String(totalDecisions),    color: 'var(--cs-red)' },
+			{ label: _('24h alerts'),          value: String(alerts24h),         color: 'var(--cs-orange)' },
+			{ label: _('Top scenario'),         value: topScenario,               color: 'var(--cs-purple)' },
+			{ label: _('Top country'),          value: topCountry,                color: 'var(--cs-blue)' },
+			{ label: _('Unique attacker countries'), value: uniqueCountries + ' ' + _('countries'), color: 'var(--cs-text-primary)' }
 		];
 
 		return E('div', { 'class': 'cs-card' }, [
 			E('div', { 'class': 'cs-card-header' }, [
-				E('div', { 'class': 'cs-card-title' }, '🎯 Threat Intelligence Summary'),
-				E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' }, '集計ベース: 全期間')
+				E('div', { 'class': 'cs-card-title' }, '🎯 ' + _('Threat Intelligence Summary')),
+				E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' }, _('All-time aggregate'))
 			]),
 			E('div', { 'class': 'cs-card-body' }, [
 				E('div', { 'style': 'display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px' },
@@ -403,7 +404,7 @@ return view.extend({
 		return E('div', { 'class': 'cs-modal-overlay', 'id': 'ban-modal', 'style': 'display:none' }, [
 			E('div', { 'class': 'cs-modal' }, [
 				E('div', { 'class': 'cs-modal-header' }, [
-					E('div', { 'class': 'cs-modal-title' }, '🚫 IP Ban を追加'),
+					E('div', { 'class': 'cs-modal-title' }, '🚫 ' + _('Add IP Ban')),
 					E('button', {
 						'class': 'cs-modal-close',
 						'click': ui.createHandlerFn(this, 'closeBanModal')
@@ -411,18 +412,18 @@ return view.extend({
 				]),
 				E('div', { 'class': 'cs-modal-body' }, [
 					E('div', { 'class': 'cs-form-group' }, [
-						E('label', { 'class': 'cs-form-label' }, 'IP アドレス / CIDR'),
+						E('label', { 'class': 'cs-form-label' }, _('IP Address or CIDR')),
 						E('input', {
 							'class': 'cs-input',
 							'id': 'ban-ip',
 							'type': 'text',
-							'placeholder': '192.168.1.100 または 10.0.0.0/24',
+							'placeholder': '192.168.1.100 / 10.0.0.0/24',
 							'autocomplete': 'off'
 						}),
-						E('div', { 'class': 'cs-form-hint' }, 'IPv4 アドレスまたは CIDR 形式で入力')
+						E('div', { 'class': 'cs-form-hint' }, _('IPv4 / IPv6 or CIDR notation'))
 					]),
 					E('div', { 'class': 'cs-form-group' }, [
-						E('label', { 'class': 'cs-form-label' }, '封鎖期間'),
+						E('label', { 'class': 'cs-form-label' }, _('Duration')),
 						E('input', {
 							'class': 'cs-input',
 							'id': 'ban-duration',
@@ -430,15 +431,15 @@ return view.extend({
 							'placeholder': '4h',
 							'value': '4h'
 						}),
-						E('div', { 'class': 'cs-form-hint' }, '例: 30m, 4h, 7d, 60s（数字＋s/m/h/d）')
+						E('div', { 'class': 'cs-form-hint' }, _('Examples: 30m, 4h, 7d, 1w'))
 					]),
 					E('div', { 'class': 'cs-form-group' }, [
-						E('label', { 'class': 'cs-form-label' }, '理由 (任意)'),
+						E('label', { 'class': 'cs-form-label' }, _('Reason (optional)')),
 						E('input', {
 							'class': 'cs-input',
 							'id': 'ban-reason',
 							'type': 'text',
-							'placeholder': 'Manual ban from dashboard'
+							'placeholder': _('Manual ban from dashboard')
 						})
 					])
 				]),
@@ -446,11 +447,11 @@ return view.extend({
 					E('button', {
 						'class': 'cs-btn',
 						'click': ui.createHandlerFn(this, 'closeBanModal')
-					}, 'キャンセル'),
+					}, _('Cancel')),
 					E('button', {
 						'class': 'cs-btn cs-btn-primary',
 						'click': ui.createHandlerFn(this, 'submitBan')
-					}, '封鎖を実行')
+					}, _('Add Ban'))
 				])
 			])
 		]);
@@ -459,20 +460,20 @@ return view.extend({
 	/* ── Handlers ───────────────────────────────────────────────────────────── */
 	handleUnban: function(ip, ev) {
 		var self = this;
-		if (!confirm('IP ' + ip + ' の封鎖を解除しますか？')) return;
+		if (!confirm(_('Remove ban for') + ' ' + ip + '?')) return;
 
 		this.csApi.unbanIP(ip).then(function(result) {
 			if (result && result.success) {
-				self.showToast('✓ ' + ip + ' の封鎖を解除しました', 'success');
+				self.showToast('✓ ' + ip + ' ' + _('unbanned successfully'), 'success');
 				return self.csApi.getDashboardData();
 			} else {
-				self.showToast('✗ 解除失敗: ' + ((result && result.error) || '不明なエラー'), 'error');
+				self.showToast('✗ ' + _('Failed to unban') + ': ' + ((result && result.error) || _('Unknown error')), 'error');
 				return null;
 			}
 		}).then(function(data) {
 			if (data) { self.data = data; self.updateView(); }
 		}).catch(function(err) {
-			self.showToast('エラー: ' + err.message, 'error');
+			self.showToast(_('Error') + ': ' + err.message, 'error');
 		});
 	},
 
@@ -491,31 +492,31 @@ return view.extend({
 		var reason   = document.getElementById('ban-reason').value.trim() || 'Manual ban from dashboard';
 
 		if (!ip) {
-			self.showToast('IPアドレスを入力してください', 'error');
+			self.showToast(_('Please enter an IP address'), 'error');
 			return;
 		}
 		if (!self.csApi.isValidIP(ip)) {
-			self.showToast('無効なIPアドレス形式です', 'error');
+			self.showToast(_('Invalid IP address format'), 'error');
 			return;
 		}
 		if (!self.csApi.isValidDuration(duration)) {
-			self.showToast('無効な期間形式です（例: 4h, 30m, 7d）', 'error');
+			self.showToast(_('Invalid duration format (e.g. 4h, 30m, 7d)'), 'error');
 			return;
 		}
 
 		self.csApi.banIP(ip, duration, reason).then(function(result) {
 			if (result && result.success) {
-				self.showToast('✓ ' + ip + ' を ' + duration + ' 封鎖しました', 'success');
+				self.showToast('✓ ' + ip + ' ' + _('banned for') + ' ' + duration, 'success');
 				self.closeBanModal();
 				return self.csApi.getDashboardData();
 			} else {
-				self.showToast('✗ 封鎖失敗: ' + ((result && result.error) || '不明なエラー'), 'error');
+				self.showToast('✗ ' + _('Failed to ban') + ': ' + ((result && result.error) || _('Unknown error')), 'error');
 				return null;
 			}
 		}).then(function(data) {
 			if (data) { self.data = data; self.updateView(); }
 		}).catch(function(err) {
-			self.showToast('エラー: ' + err.message, 'error');
+			self.showToast(_('Error') + ': ' + err.message, 'error');
 		});
 	},
 
@@ -552,17 +553,17 @@ return view.extend({
 			E('div', { 'class': 'cs-grid-2' }, [
 				E('div', { 'class': 'cs-card', 'style': 'margin-bottom:0' }, [
 					E('div', { 'class': 'cs-card-header' }, [
-						E('div', { 'class': 'cs-card-title' }, '🎭 Top 攻撃シナリオ'),
+						E('div', { 'class': 'cs-card-title' }, '🎭 ' + _('Top Attack Scenarios')),
 						E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' },
-							'直近 100 アラートより集計')
+							_('Based on last 100 alerts'))
 					]),
 					E('div', { 'class': 'cs-card-body' }, this.renderTopScenarios(stats))
 				]),
 				E('div', { 'class': 'cs-card', 'style': 'margin-bottom:0' }, [
 					E('div', { 'class': 'cs-card-header' }, [
-						E('div', { 'class': 'cs-card-title' }, '🌍 Top 攻撃元国'),
+						E('div', { 'class': 'cs-card-title' }, '🌍 ' + _('Top Countries')),
 						E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' },
-							'アクティブ決定より集計')
+							_('Based on active decisions'))
 					]),
 					E('div', { 'class': 'cs-card-body' }, this.renderTopCountries(stats))
 				])
@@ -573,7 +574,7 @@ return view.extend({
 				E('div', { 'class': 'cs-card', 'style': 'margin-bottom:0' }, [
 					E('div', { 'class': 'cs-card-header' }, [
 						E('div', { 'class': 'cs-card-title' }, [
-							'🚫 アクティブ決定',
+							'🚫 ' + _('Active Decisions'),
 							decisions.length > 0
 								? E('span', { 'class': 'cs-section-badge' }, String(decisions.length))
 								: null
@@ -581,7 +582,7 @@ return view.extend({
 						E('button', {
 							'class': 'cs-btn cs-btn-primary cs-btn-sm',
 							'click': ui.createHandlerFn(self, 'openBanModal')
-						}, '+ Ban 追加')
+						}, '+ ' + _('Add Ban'))
 					]),
 					E('div', { 'class': 'cs-card-body no-padding' },
 						self.renderDecisionsTable(decisions))
@@ -589,12 +590,12 @@ return view.extend({
 				E('div', { 'class': 'cs-card', 'style': 'margin-bottom:0' }, [
 					E('div', { 'class': 'cs-card-header' }, [
 						E('div', { 'class': 'cs-card-title' }, [
-							'⚡ 最近のアラート',
+							'⚡ ' + _('Recent Alerts'),
 							alerts.length > 0
 								? E('span', { 'class': 'cs-section-badge' }, String(alerts.length))
 								: null
 						]),
-						E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' }, '最新 10 件')
+						E('div', { 'style': 'font-size:11px; color: var(--cs-text-muted)' }, _('Latest 10'))
 					]),
 					E('div', { 'class': 'cs-card-body' }, self.renderAlertsTimeline(alerts))
 				])
