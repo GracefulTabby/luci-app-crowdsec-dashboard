@@ -9,63 +9,63 @@
  */
 
 var callStatus = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'status',
 	expect: { }
 });
 
 var callDecisions = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'decisions',
 	expect: { }
 });
 
 var callAlerts = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'alerts',
 	params: ['limit'],
 	expect: { }
 });
 
 var callBouncers = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'bouncers',
 	expect: { }
 });
 
 var callMetrics = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'metrics',
 	expect: { }
 });
 
 var callMachines = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'machines',
 	expect: { }
 });
 
 var callHub = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'hub',
 	expect: { }
 });
 
 var callStats = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'stats',
 	expect: { }
 });
 
 var callBan = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'ban',
 	params: ['ip', 'duration', 'reason'],
 	expect: { }
 });
 
 var callUnban = rpc.declare({
-	object: 'luci.crowdsec-dashboard',
+	object: 'crowdsec',
 	method: 'unban',
 	params: ['ip'],
 	expect: { }

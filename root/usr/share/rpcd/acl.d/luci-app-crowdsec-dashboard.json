@@ -3,14 +3,14 @@
 		"description": "Grant access to LuCI CrowdSec Dashboard",
 		"read": {
 			"ubus": {
-				"luci.crowdsec-dashboard": [ "decisions", "alerts", "metrics", "bouncers", "machines", "hub", "status", "stats" ],
+				"crowdsec": [ "decisions", "alerts", "metrics", "bouncers", "machines", "hub", "status", "stats" ],
 				"file": [ "read", "stat" ]
 			},
 			"uci": [ "crowdsec" ]
 		},
 		"write": {
 			"ubus": {
-				"luci.crowdsec-dashboard": [ "ban", "unban" ]
+				"crowdsec": [ "ban", "unban" ]
 			}
 		}
 	}
