@@ -322,7 +322,12 @@ return view.extend({
 			self.showToast('Invalid IP address format', 'error');
 			return;
 		}
-		
+
+		if (!self.csApi.isValidDuration(duration)) {
+			self.showToast('Invalid duration format (e.g. 4h, 30m, 7d)', 'error');
+			return;
+		}
+
 		self.csApi.banIP(ip, duration, reason).then(function(result) {
 			if (result.success) {
 				self.showToast('IP ' + ip + ' banned for ' + duration, 'success');
