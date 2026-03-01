@@ -26,7 +26,7 @@ return view.extend({
 		document.head.appendChild(cssLink);
 		
 		// Load API
-		this.csApi = new api();
+		this.csApi = api;
 		
 		return this.csApi.getDashboardData();
 	},

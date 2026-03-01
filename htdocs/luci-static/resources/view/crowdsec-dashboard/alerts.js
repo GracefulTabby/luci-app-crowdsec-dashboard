@@ -26,7 +26,7 @@ return view.extend({
 		cssLink.href = L.resource('crowdsec-dashboard/dashboard.css');
 		document.head.appendChild(cssLink);
 		
-		this.csApi = new api();
+		this.csApi = api;
 		return this.csApi.getAlerts(this.limit);
 	},
 
