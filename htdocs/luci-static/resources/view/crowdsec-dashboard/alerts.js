@@ -68,6 +68,11 @@ return view.extend({
 		var self = this;
 		var duration = '4h';
 		var reason = 'Manual ban from alert: ' + scenario;
+
+		if (!self.csApi.isValidIP(ip)) {
+			self.showToast('Invalid source IP address', 'error');
+			return;
+		}
 		
 		if (!confirm('Ban IP ' + ip + ' for ' + duration + '?')) {
 			return;
@@ -156,7 +161,7 @@ return view.extend({
 				E('td', {}, E('span', { 
 					'style': 'font-size: 11px; color: var(--cs-text-muted)',
 					'title': self.renderAlertDetails(a)
-				}, self.renderAlertDetails(a).substring(0, 40) + '...')),
+			}, (function(s) { return s.length > 40 ? s.substring(0, 40) + '...' : s; })(self.renderAlertDetails(a)))),
 				E('td', {}, sourceIp !== 'N/A' ? E('button', {
 					'class': 'cs-btn cs-btn-sm',
 					'click': ui.createHandlerFn(self, 'handleBanFromAlert', sourceIp, a.scenario)

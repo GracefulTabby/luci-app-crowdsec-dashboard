@@ -141,6 +141,8 @@ return view.extend({
 				self.filterDecisions();
 				self.updateTable();
 			}
+		}).catch(function(err) {
+			self.showToast('Error: ' + err.message, 'error');
 		});
 	},
 
